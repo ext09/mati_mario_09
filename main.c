@@ -44,7 +44,7 @@ int main ( int argc, char** argv )
     dstrect.y = (screen->h - bmp->h) / 2;
 
     // program main loop
-    int done = 0;
+    int done = 0;// неправельная строчка
     while (!done)
     {
         // message processing loop
