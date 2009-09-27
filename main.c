@@ -1,93 +1,87 @@
-#ifdef __cplusplus
-    #include <cstdlib>
-#else
-    #include <stdlib.h>
-#endif
-#ifdef __APPLE__
-#include <SDL/SDL.h>
-#else
-#include <SDL.h>
-#endif
+#include <stdlib.h> // For some useful functions such as atexit :)
+#include "SDL.h" // main SDL header
+#include "SDL_image.h" // image library, if your only using BMP's, get ride of this.
+#define SCREEN_WIDTH 640
+#define SCREEN_HEIGHT 480
+#define true 1
+#define false 0 //You might have to declaire True and False.
+#define COLORKEY 255, 0, 255 //Your Transparent colour
 
-int main ( int argc, char** argv )
+SDL_Surface *screen; //This pointer will reference the backbuffer
+
+//I have set the flag SDL_SWSURFACE for a window :)
+int InitVideo()
 {
-    // initialize SDL video
-    if ( SDL_Init( SDL_INIT_VIDEO ) < 0 )
+    // Load SDL
+    Uint32  flags = SDL_DOUBLEBUF | SDL_SWSURFACE;
+    if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
-        printf( "Unable to init SDL: %s\n", SDL_GetError() );
-        return 1;
+        fprintf(stderr, "Unable to initialize SDL: %s\n", SDL_GetError());
+        return false;
     }
+    atexit(SDL_Quit); // Clean it up nicely :)
 
-    // make sure SDL cleans up before exit
-    atexit(SDL_Quit);
-
-    // create a new window
-    SDL_Surface* screen = SDL_SetVideoMode(640, 480, 16,
-                                           SDL_HWSURFACE|SDL_DOUBLEBUF);
-    if ( !screen )
+    // fullscreen can be toggled at run time :) any you might want to change the flags with params?
+    //set the main screen to SCREEN_WIDTHxSCREEN_HEIGHT with a colour depth of 16:
+    screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 16, flags);
+    if (screen == NULL)
     {
-        printf("Unable to set 640x480 video: %s\n", SDL_GetError());
-        return 1;
+        fprintf(stderr, "Unable to set video mode: %s\n", SDL_GetError());
+        return false;
     }
+    return true;
+}
 
-    // load an image
-    SDL_Surface* bmp = SDL_LoadBMP("cb.bmp");
-    if (!bmp)
+//--------------------------- Drawing Stuff -------------------------
+SDL_Surface* LoadImage(char *file, int *exitstate)
+{
+    SDL_Surface *tmp;
+    tmp = IMG_Load(file);
+    *exitstate = false;
+
+    if (tmp == NULL)
     {
-        printf("Unable to load bitmap: %s\n", SDL_GetError());
-        return 1;
+        fprintf(stderr, "Error: '%s' could not be opened: %s\n", file, IMG_GetError());
     }
-
-    // centre the bitmap on screen
-    SDL_Rect dstrect;
-    dstrect.x = (screen->w - bmp->w) / 2;
-    dstrect.y = (screen->h - bmp->h) / 2;
-
-    // program main loop
-    int done = 0;// неправельная строчка
-    while (!done)
+    else
     {
-        // message processing loop
-        SDL_Event event;
-        while (SDL_PollEvent(&event))
-        {
-            // check for messages
-            switch (event.type)
-            {
-                // exit if the window is closed
-            case SDL_QUIT:
-                done = 1;
-                break;
+        if (SDL_SetColorKey(tmp, SDL_SRCCOLORKEY | SDL_RLEACCEL, SDL_MapRGB(tmp->format, COLORKEY)) == -1)
+            fprintf(stderr, "Warning: colorkey will not be used, reason: %s\n", SDL_GetError());
+        *exitstate = true;
+    }
+    return tmp;
+}
 
-                // check for keypresses
-            case SDL_KEYDOWN:
-                {
-                    // exit if ESCAPE is pressed
-                    if (event.key.keysym.sym == SDLK_ESCAPE)
-                        done = 1;
-                    break;
-                }
-            } // end switch
-        } // end of message processing
+void DrawImage(SDL_Surface *srcimg, int sx, int sy, int sw, int sh, SDL_Surface *dstimg, int dx, int dy, int alpha)
+{
+    alpha = 255;
+    if ((srcimg == NULL) || (alpha == 0)) return; //If theres no image, or its 100% transparent.
+    SDL_Rect src, dst;
 
-        // DRAWING STARTS HERE
+    src.x = sx;
+    src.y = sy;
+    src.w = sw;
+    src.h = sh;
+    dst.x = dx;
+    dst.y = dy;
+    dst.w = src.w;
+    dst.h = src.h;
+    if (alpha != 255) SDL_SetAlpha(srcimg, SDL_SRCALPHA, alpha);
+    SDL_BlitSurface(srcimg, &src, dstimg, &dst);
+}
+//------------------------ The Game -----------------------
 
-        // clear screen
-        SDL_FillRect(screen, 0, SDL_MapRGB(screen->format, 0, 0, 0));
+int main()
+{
+    int res = 0; //Results
+    if (InitVideo() == false) return 1;
+    SDL_Surface *tux = LoadImage("tux.bmp",res);
+    if (res == false) return 1;
+    DrawImage(tux, 0,0, tux->w, tux->h, screen, 10, 10, 128);
+    SDL_Flip(screen); //Refresh the screen
+    SDL_Delay(2500); //Wait a bit :)
 
-        // draw bitmap
-        SDL_BlitSurface(bmp, 0, screen, &dstrect);
-
-        // DRAWING ENDS HERE
-
-        // finally, update the screen :)
-        SDL_Flip(screen);
-    } // end main loop
-
-    // free loaded bitmap
-    SDL_FreeSurface(bmp);
-
-    // all is well ;)
-    printf("Exited cleanly\n");
+    //cleanup
+    SDL_FreeSurface(tux);
     return 0;
 }
