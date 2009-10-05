@@ -1,87 +1,169 @@
-#include <stdlib.h> // For some useful functions such as atexit :)
-#include "SDL.h" // main SDL header
-#include "SDL_image.h" // image library, if your only using BMP's, get ride of this.
-#define SCREEN_WIDTH 640
-#define SCREEN_HEIGHT 480
-#define true 1
-#define false 0 //You might have to declaire True and False.
-#define COLORKEY 255, 0, 255 //Your Transparent colour
+#include <stdio.h>
+#include <stdlib.h>
+#include <SDL/SDL.h>
 
-SDL_Surface *screen; //This pointer will reference the backbuffer
+void InitImages(void);
+void DrawIMG(SDL_Surface *img, int x, int y);
+void DrawIMG1(SDL_Surface *img, int x, int y, int w, int h, int sx, int sy);
+void DrawIMG2(SDL_Surface *img, int x, int y, int w, int h, int sx, int sy);
+void DrawBG(void);
+void DrawScene(void);
 
-//I have set the flag SDL_SWSURFACE for a window :)
-int InitVideo()
+SDL_Surface *back;
+SDL_Surface *image;
+SDL_Surface *box;
+SDL_Surface *screen;
+
+int xpos=0, ypos=200, xstep=0, ystep=0;
+
+/* ------------------------------------------- */
+int main(int argc, char *argv[])
 {
-    // Load SDL
-    Uint32  flags = SDL_DOUBLEBUF | SDL_SWSURFACE;
-    if (SDL_Init(SDL_INIT_VIDEO) != 0)
-    {
-        fprintf(stderr, "Unable to initialize SDL: %s\n", SDL_GetError());
-        return false;
-    }
-    atexit(SDL_Quit); // Clean it up nicely :)
+    Uint8* keys;
 
-    // fullscreen can be toggled at run time :) any you might want to change the flags with params?
-    //set the main screen to SCREEN_WIDTHxSCREEN_HEIGHT with a colour depth of 16:
-    screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 16, flags);
-    if (screen == NULL)
+    if ( SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO) < 0 )
     {
-        fprintf(stderr, "Unable to set video mode: %s\n", SDL_GetError());
-        return false;
+        printf("Unable to init SDL: %s\n", SDL_GetError());
+        exit(1);
     }
-    return true;
+
+    atexit(SDL_Quit);
+
+    SDL_WM_SetCaption(" qw ","qw");
+    SDL_WM_SetIcon(SDL_LoadBMP("icon.bmp"), NULL);
+
+    screen=SDL_SetVideoMode(640,480,32,SDL_HWSURFACE|SDL_DOUBLEBUF);
+    if ( screen == NULL )
+    {
+        printf("Unable to set 640x480 video: %s\n", SDL_GetError());
+        exit(1);
+    }
+
+
+    SDL_EnableKeyRepeat(1, SDL_DEFAULT_REPEAT_INTERVAL/5);
+    InitImages();
+    SDL_SetColorKey(image, SDL_SRCCOLORKEY, SDL_MapRGB(image->format,255,255,255));
+    DrawBG();
+    DrawScene();
+    int i=0;
+    int done=0;
+    while (done == 0)
+    {
+        SDL_Event event;
+        while ( SDL_PollEvent(&event) )
+        {
+            if ( event.type == SDL_QUIT )
+            {
+                done = 1;
+            }
+            if ( event.type == SDL_KEYDOWN )
+            {
+                if ( event.key.keysym.sym == SDLK_ESCAPE )
+                {
+                    done = 1;
+                }
+                keys = SDL_GetKeyState(NULL);
+
+                if (keys[SDLK_UP])
+                {
+                    ystep = -1;
+                }
+                if (keys[SDLK_DOWN])
+                {
+                    ystep = 1;
+                }
+                if (keys[SDLK_LEFT])
+                {
+                    xstep = -1;
+                }
+                if (keys[SDLK_RIGHT])
+                {
+                    xstep = 1;
+                }
+                if (keys[SDLK_SPACE])
+                {
+                    ystep = -5;
+                    i=1;
+                }
+                DrawScene();
+            }
+        }
+    }
+
+    return 0;
+
 }
 
-//--------------------------- Drawing Stuff -------------------------
-SDL_Surface* LoadImage(char *file, int *exitstate)
+/* ------------------------------------------- */
+void InitImages()
 {
-    SDL_Surface *tmp;
-    tmp = IMG_Load(file);
-    *exitstate = false;
-
-    if (tmp == NULL)
-    {
-        fprintf(stderr, "Error: '%s' could not be opened: %s\n", file, IMG_GetError());
-    }
-    else
-    {
-        if (SDL_SetColorKey(tmp, SDL_SRCCOLORKEY | SDL_RLEACCEL, SDL_MapRGB(tmp->format, COLORKEY)) == -1)
-            fprintf(stderr, "Warning: colorkey will not be used, reason: %s\n", SDL_GetError());
-        *exitstate = true;
-    }
-    return tmp;
+    back=SDL_LoadBMP("bg.bmp");
+    image=SDL_LoadBMP("image.bmp");
+    box=SDL_LoadBMP("box.bmp");
 }
 
-void DrawImage(SDL_Surface *srcimg, int sx, int sy, int sw, int sh, SDL_Surface *dstimg, int dx, int dy, int alpha)
+/* ------------------------------------------- */
+void DrawIMG(SDL_Surface *img, int x, int y)
 {
-    alpha = 255;
-    if ((srcimg == NULL) || (alpha == 0)) return; //If theres no image, or its 100% transparent.
-    SDL_Rect src, dst;
 
+    SDL_Rect dest;
+    dest.x = x;
+    dest.y = y;
+
+    SDL_BlitSurface(img, NULL, screen, &dest);
+
+}
+
+/* ------------------------------------------- */
+void DrawIMG1(SDL_Surface *img, int x, int y, int w, int h, int sx, int sy)
+{
+
+    SDL_Rect dest;
+    dest.x = x;
+    dest.y = y;
+
+    SDL_Rect src;
     src.x = sx;
     src.y = sy;
-    src.w = sw;
-    src.h = sh;
-    dst.x = dx;
-    dst.y = dy;
-    dst.w = src.w;
-    dst.h = src.h;
-    if (alpha != 255) SDL_SetAlpha(srcimg, SDL_SRCALPHA, alpha);
-    SDL_BlitSurface(srcimg, &src, dstimg, &dst);
+    src.w = w;
+    src.h = h;
+
+    SDL_BlitSurface(img, &src, screen, &dest);
+
 }
-//------------------------ The Game -----------------------
-
-int main()
+void DrawIMG2(SDL_Surface *img, int x, int y, int w, int h, int sx, int sy)
 {
-    int res = 0; //Results
-    if (InitVideo() == false) return 1;
-    SDL_Surface *tux = LoadImage("tux.bmp",res);
-    if (res == false) return 1;
-    DrawImage(tux, 0,0, tux->w, tux->h, screen, 10, 10, 128);
-    SDL_Flip(screen); //Refresh the screen
-    SDL_Delay(2500); //Wait a bit :)
+    SDL_Rect dest;
+    dest.x = x;
+    dest.y = y;
 
-    //cleanup
-    SDL_FreeSurface(tux);
-    return 0;
+    SDL_Rect src;
+    src.x = sx;
+    src.y = sy;
+    src.w = w;
+    src.h = h;
+
+    SDL_BlitSurface(img, &src, screen, &dest);
+}
+
+/* ------------------------------------------- */
+void DrawBG()
+{
+
+    DrawIMG(back, 0, 0);
+
+}
+
+/* ------------------------------------------- */
+void DrawScene()
+{
+    DrawIMG1(back, xpos, ypos, 135, 135, xpos, ypos);
+    xpos += xstep;
+    ypos += ystep;
+    DrawIMG(image, xpos, ypos);
+    xstep = ystep = 0;
+    DrawIMG2(box, 200, 200, 152, 152, 0, 0);
+    SDL_Flip(screen);
+
+
 }
