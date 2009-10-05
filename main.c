@@ -45,7 +45,6 @@ int main(int argc, char *argv[])
     SDL_SetColorKey(image, SDL_SRCCOLORKEY, SDL_MapRGB(image->format,255,255,255));
     DrawBG();
     DrawScene();
-    int i=0;
     int done=0;
     while (done == 0)
     {
@@ -83,7 +82,6 @@ int main(int argc, char *argv[])
                 if (keys[SDLK_SPACE])
                 {
                     ystep = -5;
-                    i=1;
                 }
                 DrawScene();
             }
@@ -131,20 +129,6 @@ void DrawIMG1(SDL_Surface *img, int x, int y, int w, int h, int sx, int sy)
     SDL_BlitSurface(img, &src, screen, &dest);
 
 }
-void DrawIMG2(SDL_Surface *img, int x, int y, int w, int h, int sx, int sy)
-{
-    SDL_Rect dest;
-    dest.x = x;
-    dest.y = y;
-
-    SDL_Rect src;
-    src.x = sx;
-    src.y = sy;
-    src.w = w;
-    src.h = h;
-
-    SDL_BlitSurface(img, &src, screen, &dest);
-}
 
 /* ------------------------------------------- */
 void DrawBG()
@@ -162,8 +146,6 @@ void DrawScene()
     ypos += ystep;
     DrawIMG(image, xpos, ypos);
     xstep = ystep = 0;
-    DrawIMG2(box, 200, 200, 152, 152, 0, 0);
+    DrawIMG1(box, 200, 200, 152, 152, 0, 0);
     SDL_Flip(screen);
-
-
 }
