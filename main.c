@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <SDL/SDL.h>
 
-
 #define HEIGHT 10
 #define WIDTH 13
 
@@ -19,16 +18,12 @@ SDL_Surface *sky;
 SDL_Surface *earth;
 SDL_Surface *wood;
 SDL_Surface *screen;
-SDL_Surface *back;
 SDL_Surface *image1;
-SDL_Surface *box;
-SDL_Surface *screen;
 
 int xpos=0, ypos=400, xstep=0, ystep=0;
 
-    void level()
-    {
-    // int lev[HEIGHT][WIDTH];
+void level()
+{
     int  i,j;
     FILE *fp;
     if ((fp=fopen("lev.txt","r "))==NULL)
@@ -55,13 +50,12 @@ int xpos=0, ypos=400, xstep=0, ystep=0;
         }
         putchar ('\n');
     }
-    }
+}
 /* ------------------------------------------- */
 int main(int argc, char *argv[])
 {
     Uint8* keys;
     level();
-
     if ( SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO) < 0 )
     {
         printf("Unable to init SDL: %s\n", SDL_GetError());
@@ -104,19 +98,19 @@ int main(int argc, char *argv[])
                 keys = SDL_GetKeyState(NULL);
                 if (keys[SDLK_DOWN])
                 {
-                    ystep = 1;
+                    ystep = 2;
                 }
                 if (keys[SDLK_LEFT])
                 {
-                    xstep = -1;
+                    xstep = -2;
                 }
                 if (keys[SDLK_RIGHT])
                 {
-                    xstep = 1;
+                    xstep = 2;
                 }
                 if (keys[SDLK_SPACE])
                 {
-                    ystep = -5;
+                    ystep = -8;
                 }
                 DrawScene();
             }
@@ -129,9 +123,7 @@ int main(int argc, char *argv[])
 /* ------------------------------------------- */
 void InitImages()
 {
-    back=SDL_LoadBMP("bg.bmp");
     image1=SDL_LoadBMP("image.bmp");
-    box=SDL_LoadBMP("box.bmp");
     sky=SDL_LoadBMP("sky.bmp");
     wood=SDL_LoadBMP("wood.bmp");
     earth=SDL_LoadBMP("earth.bmp");
@@ -172,7 +164,7 @@ void DrawIMG1(SDL_Surface *img, int x, int y, int w, int h, int sx, int sy)
 void DrawBG()
 {
 
-    DrawIMG(back, 0, 0);
+    DrawIMG(sky, 0, 0);
 
 }
 
@@ -211,6 +203,5 @@ void DrawScene()
     ypos += ystep;
     DrawIMG(image1, xpos, ypos);
     xstep = ystep = 0;
-//   DrawIMG1(box, 200, 340, 152, 152, 0, 0);
     SDL_Flip(screen);
 }
