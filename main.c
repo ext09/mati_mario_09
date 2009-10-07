@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL/SDL.h>
+#include "SDL/SDL_mixer.h"
 
 #define HEIGHT 10
 #define WIDTH 13
@@ -10,52 +11,36 @@ void DrawIMG(SDL_Surface *img, int x, int y);
 void DrawIMG1(SDL_Surface *img, int x, int y, int w, int h, int sx, int sy);
 void DrawBG(void);
 void DrawScene(void);
-
+void Grav(void);
+void level(void);
+void sound();
+void LoadMusic(void);
+void clean_up(void);
 
 int lev[HEIGHT][WIDTH];
-
+// image********
 SDL_Surface *sky;
 SDL_Surface *earth;
 SDL_Surface *wood;
 SDL_Surface *screen;
 SDL_Surface *image1;
+//sound
+
+Mix_Music *music = NULL;//The sound effects that will be used
+Mix_Chunk *run = NULL;
+
 
 int xpos=0, ypos=400, xstep=0, ystep=0;
-
-void level()
-{
-    int  i,j;
-    FILE *fp;
-    if ((fp=fopen("lev.txt","r "))==NULL)
-    {
-        printf("Owubka co3danu9.\n");
-        exit(666);
-    }
-    for (i=0;i<HEIGHT;i++)
-    {
-        for (j=0;j<WIDTH;j++)
-        {
-            fscanf(fp,"%1d",&lev[i][j]);
-            //fprintf(fp, "%d",lev[i][j]);
-        }
-        fscanf(fp,"\n");
-    }
-    fclose(fp);
-    //*******************************************output
-    for (i=0;i<HEIGHT;i++)
-    {
-        for (j=0;j<WIDTH;j++)
-        {
-            printf("%2d",lev[i][j]);
-        }
-        putchar ('\n');
-    }
-}
 /* ------------------------------------------- */
 int main(int argc, char *argv[])
 {
+    printf ("\t\nREADY\n");
     Uint8* keys;
+    sound();
     level();
+    LoadMusic();
+    Mix_VolumeMusic(90);
+    Mix_VolumeChunk(run,45);
     if ( SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO) < 0 )
     {
         printf("Unable to init SDL: %s\n", SDL_GetError());
@@ -68,18 +53,19 @@ int main(int argc, char *argv[])
     SDL_WM_SetIcon(SDL_LoadBMP("icon.bmp"), NULL);
 
 
-    screen=SDL_SetVideoMode(640,480,32,SDL_HWSURFACE|SDL_DOUBLEBUF);
+    screen=SDL_SetVideoMode(640,485,16,SDL_HWSURFACE|SDL_DOUBLEBUF);
     if ( screen == NULL )
     {
         printf("Unable to set 640x480 video: %s\n", SDL_GetError());
         exit(1);
     }
-    SDL_EnableKeyRepeat(1, SDL_DEFAULT_REPEAT_INTERVAL/6);
+    SDL_EnableKeyRepeat(1, SDL_DEFAULT_REPEAT_INTERVAL/2);
     InitImages();
     DrawBG();
     SDL_SetColorKey (image1, SDL_SRCCOLORKEY, SDL_MapRGB(image1->format,255,255,255));
     DrawScene();
     int done=0;
+Mix_PlayMusic( music,-1 );
     while (done == 0)
     {
         SDL_Event event;
@@ -91,6 +77,9 @@ int main(int argc, char *argv[])
             }
             if ( event.type == SDL_KEYDOWN )
             {
+
+             //   Mix_ResumeMusic();
+
                 if ( event.key.keysym.sym == SDLK_ESCAPE )
                 {
                     done = 1;
@@ -103,23 +92,57 @@ int main(int argc, char *argv[])
                 if (keys[SDLK_LEFT])
                 {
                     xstep = -2;
+                    Mix_PlayChannel( 2, run, 0 );
                 }
+
                 if (keys[SDLK_RIGHT])
                 {
                     xstep = 2;
+                    Mix_PlayChannel( 2, run, 0 );
                 }
                 if (keys[SDLK_SPACE])
                 {
-                    ystep = -8;
+                    ystep = -7;
+
                 }
+                //Mix_PauseMusic();
                 DrawScene();
             }
         }
     }
-
+    clean_up();
+    printf ("FINISH");
     return 0;
 
 }
+/* ------------------------------------------- */
+/* ----------------MUSIC---------------------- */
+/* ------------------------------------------- */
+void  sound()
+{
+    Mix_GetMusicType(music);
+if( Mix_OpenAudio( 22050, MIX_DEFAULT_FORMAT, 2, 4096 ) == -1 )
+    {
+        printf("sound not load  120line");
+    }
+ }
+void LoadMusic()
+{
+   // Mix_GetMusicType(music);
+    music = Mix_LoadMUS( "music.mp3" );
+    if( music == NULL )
+    {
+       printf(" music not found");
+    }
+    run = Mix_LoadWAV( "high.wav" );
+    if( run == NULL )
+    {
+       printf(" music not found");
+    }
+
+}
+/* ------------------------------------------- */
+/* ----------------IMAGE---------------------- */
 /* ------------------------------------------- */
 void InitImages()
 {
@@ -127,10 +150,7 @@ void InitImages()
     sky=SDL_LoadBMP("sky.bmp");
     wood=SDL_LoadBMP("wood.bmp");
     earth=SDL_LoadBMP("earth.bmp");
-
 }
-
-/* ------------------------------------------- */
 void DrawIMG(SDL_Surface *img, int x, int y)
 {
 
@@ -182,7 +202,6 @@ void DrawScene()
             {
                 DrawIMG1(sky, z2, y2, 50, 50,0,0);
                 z2=z2+50;
-
             }
             if (lev[i][j] == 1)
             {
@@ -204,4 +223,51 @@ void DrawScene()
     DrawIMG(image1, xpos, ypos);
     xstep = ystep = 0;
     SDL_Flip(screen);
+}
+/* ------------------------------------------- */
+
+
+void level()
+{
+    int  i,j;
+    FILE *fp;
+    if ((fp=fopen("lev.txt","r "))==NULL)
+    {
+        printf("Owubka co3danu9.\n");
+        exit(666);
+    }
+    for (i=0;i<HEIGHT;i++)
+    {
+        for (j=0;j<WIDTH;j++)
+        {
+            fscanf(fp,"%1d",&lev[i][j]);
+        }
+        fscanf(fp,"\n");
+    }
+    fclose(fp);
+    //*******************************************output
+    for (i=0;i<HEIGHT;i++)
+    {
+        for (j=0;j<WIDTH;j++)
+        {
+            printf("%2d",lev[i][j]);
+        }
+        putchar ('\n');
+    }
+}
+
+void Grav()
+{
+
+}
+void clean_up()
+{
+     //Free the surfaces
+    SDL_FreeSurface( screen );
+
+     //Free the sound effects
+    Mix_CloseAudio();
+    Mix_FreeChunk(run);
+     //Quit SDL
+    SDL_Quit();
 }
