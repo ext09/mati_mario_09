@@ -2,9 +2,8 @@
 #include <stdlib.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_mixer.h>
-
-#define HEIGHT 10
-#define WIDTH 13
+#define HEIGHT 16
+#define WIDTH 20
 
 /* ------------------------------------------- */
 /* ----------------function------------------- */
@@ -20,9 +19,10 @@ void sound(void);
 void LoadMusic(void);
 void clean_up(void);
 void move(void);
-
+int main_menu(void);
 
 int lev[HEIGHT][WIDTH];
+
 // image
 SDL_Surface *sky;
 SDL_Surface *earth;
@@ -31,17 +31,21 @@ SDL_Surface *screen;
 SDL_Surface *image1;
 // sound
 Mix_Music *music = NULL;//The sound effects that will be used
+Mix_Music *music_menu = NULL;
 Mix_Chunk *run = NULL;
 
 /* ------------------------------------------- */
-int xpos=0, ypos=400, xstep=0, ystep=0;
+int xpos=0, ypos=370, xstep=0, ystep=0;
+
 /* ------------------------------------------- */
 /* ----------------MAIN----------------------- */
 /* ------------------------------------------- */
+
 int main(int argc, char *argv[])
 {
+    main_menu();
     printf ("\t\nREADY\n");
-//   Uint8* keys;
+ //   Uint8* keys;
     sound();
     level();
     LoadMusic();
@@ -56,16 +60,16 @@ int main(int argc, char *argv[])
 
     SDL_WM_SetCaption("...","Mario");
     SDL_WM_SetIcon(SDL_LoadBMP("icon.bmp"), NULL);
-    screen=SDL_SetVideoMode(640,480,16,SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_FULLSCREEN);
+    screen=SDL_SetVideoMode(1024,768,32,SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_FULLSCREEN);
     if ( screen == NULL )
     {
         printf("Unable to set 640x480 video: %s\n", SDL_GetError());
         exit(1);
     }
-    SDL_EnableKeyRepeat(1, SDL_DEFAULT_REPEAT_INTERVAL/20);
+    SDL_EnableKeyRepeat(1, SDL_DEFAULT_REPEAT_INTERVAL/5);
     InitImages();
     DrawBG();
-    SDL_SetColorKey (image1, SDL_SRCCOLORKEY, SDL_MapRGB(image1->format,255,255,250));
+    SDL_SetColorKey (image1, SDL_SRCCOLORKEY, SDL_MapRGB(image1->format,255,255,255));
     DrawScene();
     int done=0;
     Mix_PlayMusic( music,-1 );
@@ -88,9 +92,7 @@ int main(int argc, char *argv[])
                     done = 1;
                 }
                 // keys = SDL_GetKeyState(NULL);
-
-                move();
-
+               move();
                 //Mix_PauseMusic();
                 DrawScene();
             }
@@ -104,6 +106,7 @@ int main(int argc, char *argv[])
 /* ------------------------------------------- */
 /* ----------------MUSIC---------------------- */
 /* ------------------------------------------- */
+
 void  sound()
 {
     Mix_GetMusicType(music);
@@ -112,10 +115,16 @@ void  sound()
         printf("sound not load ");
     }
 }
+
 void LoadMusic()
 {
     music = Mix_LoadMUS( "music.mp3" );
     if ( music == NULL )
+    {
+        printf(" music not found");
+    }
+    music_menu = Mix_LoadMUS( "music_menu.mp3" );
+    if ( music_menu == NULL )
     {
         printf(" music not found");
     }
@@ -128,6 +137,7 @@ void LoadMusic()
 /* ------------------------------------------- */
 /* ----------------IMAGE---------------------- */
 /* ------------------------------------------- */
+
 void InitImages()
 {
     image1=SDL_LoadBMP("image.bmp");
@@ -241,11 +251,7 @@ void clean_up()
     SDL_Quit();
 }
 
-
-
-
-//MOVE//////////////////////////////////////
-
+//MOVE------------------------------------
 void move()
 {
     int i,j,i1,j1;
@@ -291,16 +297,7 @@ void move()
         j=xpos/50;
         if (lev[i][j]==0
                 &&(!j1||lev[i][j+1]==0))
-
             ystep = -5;
-
     }
 
 }
-
-
-
-
-
-
-
