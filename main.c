@@ -62,10 +62,10 @@ int main(int argc, char *argv[])
         printf("Unable to set 640x480 video: %s\n", SDL_GetError());
         exit(1);
     }
-    SDL_EnableKeyRepeat(1, SDL_DEFAULT_REPEAT_INTERVAL/7);
+    SDL_EnableKeyRepeat(1, SDL_DEFAULT_REPEAT_INTERVAL/20);
     InitImages();
     DrawBG();
-    SDL_SetColorKey (image1, SDL_SRCCOLORKEY, SDL_MapRGB(image1->format,255,255,255));
+    SDL_SetColorKey (image1, SDL_SRCCOLORKEY, SDL_MapRGB(image1->format,255,255,250));
     DrawScene();
     int done=0;
     Mix_PlayMusic( music,-1 );
@@ -244,488 +244,58 @@ void clean_up()
 
 
 
-//new//////////////////////////////////////
+//MOVE//////////////////////////////////////
 
 void move()
 {
-    int i,j;
+    int i,j,i1,j1;
     Uint8* keys;
-    i=ypos/50;
-    j=xpos/50;
+    // i=ypos/50;
+    i1=ypos%50;
+    // j=xpos/50;
+    j1=xpos%50;
     keys = SDL_GetKeyState(NULL);
-    //1
-    if (((lev[i-1][j-1]==0)||(lev[i-1][j-1]==1)||(lev[i-1][j-1]==2))
-            &&((lev[i-1][j]==1)||(lev[i-1][j]==2))
-            &&((lev[i-1][j+1]==0)||(lev[i-1][j+1]==1)||(lev[i-1][j+1]==2))
-            &&((lev[i+1][j-1]==0)||(lev[i+1][j-1]==1)||(lev[i+1][j-1]==2))
-            &&((lev[i+1][j]==1)||(lev[i+1][j]==2))
-            &&((lev[i+1][j+1]==0)||(lev[i+1][j+1]==1)||(lev[i+1][j+1]==2))
-            &&(lev[i][j-1]==0)
-            &&(lev[i][j+1]==0))
+
+    if (keys[SDLK_DOWN])
     {
-        if (keys[SDLK_DOWN])
-        {
-            ystep = 0;
-        }
-        if (keys[SDLK_LEFT])
-        {
-            xstep = -2;
-            Mix_PlayChannel(2,run,0);
-        }
-
-        if (keys[SDLK_RIGHT])
-        {
-            xstep = 2;
-            Mix_PlayChannel(2,run,0);
-        }
-        if (keys[SDLK_SPACE])
-        {
-            ystep = 0;
-
-        }
-
-    }
-//2
-    if (((lev[i-1][j-1]==0)||(lev[i-1][j-1]==1)||(lev[i-1][j-1]==2))
-            &&((lev[i][j-1]==1)||(lev[i][j-1]==2))
-            &&((lev[i+1][j-1]==0)||(lev[i+1][j-1]==1)||(lev[i+1][j-1]==2))
-            &&((lev[i-1][j+1]==0)||(lev[i-1][j+1]==1)||(lev[i-1][j+1]==2))
-            &&((lev[i][j+1]==1)||(lev[i][j+1]==2))
-            &&((lev[i+1][j+1]==0)||(lev[i+1][j+1]==1)||(lev[i+1][j+1]==2))
-            &&(lev[i-1][j]==0)
-            &&(lev[i+1][j]==0))
-    {
-        if (keys[SDLK_DOWN])
-        {
+        i=(ypos+1)/50;
+        j=xpos/50;
+        if (lev[i+1][j]==0
+                &&(!j1||lev[i+1][j+1]==0))
             ystep = 2;
-        }
-        if (keys[SDLK_LEFT])
-        {
-            xstep = 0;
+    }
+    if (keys[SDLK_LEFT])
+    {
+        i=ypos/50;
+        j=(xpos-1)/50;
+        if (lev[i][j]==0
+                &&(!i1||lev[i+1][j]==0))
+            xstep = -2;
+        else
             Mix_PlayChannel(2,run,0);
-        }
+    }
 
-        if (keys[SDLK_RIGHT])
-        {
-            xstep = 0;
+    if (keys[SDLK_RIGHT])
+    {
+        i=ypos/50;
+        j=(xpos+1)/50;
+        if (lev[i][j+1]==0
+                &&(!i1||lev[i+1][j+1]==0))
+            xstep = 2;
+        else
             Mix_PlayChannel(2,run,0);
-        }
-        if (keys[SDLK_SPACE])
-        {
+    }
+    if (keys[SDLK_SPACE])
+    {
+        i=(ypos-5)/50;
+        j=xpos/50;
+        if (lev[i][j]==0
+                &&(!j1||lev[i][j+1]==0))
+
             ystep = -5;
 
-        }
     }
-//3
-    if (((lev[i-1][j-1]==0)||(lev[i-1][j-1]==1)||(lev[i-1][j-1]==2))
-            //
-            &&((lev[i-1][j]==1)||(lev[i-1][j]==2))
-            //
-            &&((lev[i-1][j+1]==0)||(lev[i-1][j+1]==1)||(lev[i-1][j+1]==2))
-            &&((lev[i+1][j-1]==0)||(lev[i+1][j-1]==1)||(lev[i+1][j-1]==2))
-            &&((lev[i+1][j+1]==0)||(lev[i+1][j+1]==1)||(lev[i+1][j+1]==2))
-            &&(lev[i][j-1]==0)
-            &&(lev[i+1][j]==0)
-            &&(lev[i][j+1]==0))
-    {
-        if (keys[SDLK_DOWN])
-        {
-            ystep = 2;
-        }
-        if (keys[SDLK_LEFT])
-        {
-            xstep = -2;
-            Mix_PlayChannel(2,run,0);
-        }
 
-        if (keys[SDLK_RIGHT])
-        {
-            xstep = 2;
-            Mix_PlayChannel(2,run,0);
-        }
-        if (keys[SDLK_SPACE])
-        {
-            ystep = 0;
-
-        }
-    }
-//4
-    if (((lev[i-1][j+1]==0)||(lev[i-1][j+1]==1)||(lev[i-1][j+1]==2))
-    &&((lev[i][j+1]==1)||(lev[i][j+1]==2))
-    &&((lev[i+1][j+1]==0)||(lev[i+1][j+1]==1)||(lev[i+1][j+1]==2))
-    &&((lev[i-1][j-1]==0)||(lev[i-1][j-1]==1)||(lev[i-1][j-1]==2))
-    &&((lev[i+1][j-1]==0)||(lev[i+1][j-1]==1)||(lev[i+1][j-1]==2))
-    &&(lev[i-1][j]==0)
-    &&(lev[i][j-1]==0)
-    &&(lev[i+1][j]==0))
-    {
-        if (keys[SDLK_DOWN])
-        {
-            ystep = 2;
-        }
-        if (keys[SDLK_LEFT])
-        {
-            xstep = -2;
-            Mix_PlayChannel(2,run,0);
-        }
-
-        if (keys[SDLK_RIGHT])
-        {
-            xstep = 0;
-            Mix_PlayChannel(2,run,0);
-        }
-        if (keys[SDLK_SPACE])
-        {
-            ystep = -5;
-
-        }
-    }
-//5
-    if (((lev[i-1][j-1]==0)||(lev[i-1][j-1]==1)||(lev[i-1][j-1]==2))
-            &&((lev[i-1][j+1]==0)||(lev[i-1][j+1]==1)||(lev[i-1][j+1]==2))
-            &&((lev[i+1][j-1]==0)||(lev[i+1][j-1]==1)||(lev[i+1][j-1]==2))
-            //
-            &&((lev[i+1][j]==1)||(lev[i+1][j]==2))
-            //
-            &&((lev[i+1][j+1]==0)||(lev[i+1][j+1]==1)||(lev[i+1][j+1]==2))
-            &&(lev[i][j-1]==0)
-            &&(lev[i-1][j]==0)
-            &&(lev[i][j+1]==0))
-    {
-        if (keys[SDLK_DOWN])
-        {
-            ystep = 0;
-        }
-        if (keys[SDLK_LEFT])
-        {
-            xstep = -2;
-            Mix_PlayChannel(2,run,0);
-        }
-
-        if (keys[SDLK_RIGHT])
-        {
-            xstep = 2;
-            Mix_PlayChannel(2,run,0);
-        }
-        if (keys[SDLK_SPACE])
-        {
-            ystep = -5;
-
-        }
-    }
-//6
-    if (((lev[i-1][j-1]==0)||(lev[i-1][j-1]==1)||(lev[i-1][j-1]==2))
-            //
-            &&((lev[i][j-1]==1)||(lev[i][j-1]==2))
-            //
-            &&((lev[i+1][j-1]==0)||(lev[i+1][j-1]==1)||(lev[i+1][j-1]==2))
-            &&((lev[i-1][j+1]==0)||(lev[i-1][j+1]==1)||(lev[i-1][j+1]==2))
-            &&((lev[i+1][j+1]==0)||(lev[i+1][j+1]==1)||(lev[i+1][j+1]==2))
-            &&(lev[i-1][j]==0)
-            &&(lev[i][j+1]==0)
-            &&(lev[i+1][j]==0))
-    {
-        if (keys[SDLK_DOWN])
-        {
-            ystep = 2;
-        }
-        if (keys[SDLK_LEFT])
-        {
-            xstep = 0;
-            Mix_PlayChannel(2,run,0);
-        }
-
-        if (keys[SDLK_RIGHT])
-        {
-            xstep = 2;
-            Mix_PlayChannel(2,run,0);
-        }
-        if (keys[SDLK_SPACE])
-        {
-            ystep = -5;
-
-        }
-    }
-//7
-    if ((lev[i][j-1]==0)
-            &&(lev[i-1][j]==0)
-            &&(lev[i][j+1]==0)
-            &&(lev[i+1][j]==0))
-           // &&((lev[i-1][j-1]==0)||(lev[i-1][j-1]==1)||(lev[i-1][j-1]==2))
-            //&&((lev[i-1][j+1]==0)|(lev[i-1][j+1]==1)||(lev[i-1][j+1]==2))
-            //&&((lev[i+1][j+1]==0)||(lev[i+1][j+1]==1)||(lev[i+1][j+1]==2))
-            //&&((lev[i+1][j-1]==0)||(lev[i+1][j-1]==1)||(lev[i+1][j-1]==2)))
-    {
-        if (keys[SDLK_DOWN])
-        {
-            ystep = 2;
-        }
-        if (keys[SDLK_LEFT])
-        {
-            xstep = -2;
-            Mix_PlayChannel(2,run,0);
-        }
-
-        if (keys[SDLK_RIGHT])
-        {
-            xstep = 2;
-            Mix_PlayChannel(2,run,0);
-        }
-        if (keys[SDLK_SPACE])
-        {
-            ystep = -5;
-
-        }
-    }
-//8
-    if (((lev[i-1][j-1]==0)||(lev[i-1][j-1]==1)||(lev[i-1][j-1]==2))
-            &&((lev[i-1][j]==1)||(lev[i-1][j]==2))
-            &&((lev[i-1][j+1]==0)||(lev[i-1][j+1]==1)||(lev[i-1][j+1]==2))
-            &&((lev[i+1][j-1]==0)||(lev[i+1][j-1]==1)||(lev[i+1][j-1]==2))
-            &&((lev[i+1][j]==1)||(lev[i+1][j]==2))
-            &&((lev[i+1][j+1]==0)||(lev[i+1][j+1]==1)||(lev[i+1][j+1]==2))
-            &&((lev[i][j-1]==1)||(lev[i][j-1]==2))
-            &&(lev[i][j+1]==0))
-    {
-        if (keys[SDLK_DOWN])
-        {
-            ystep = 0;
-        }
-        if (keys[SDLK_LEFT])
-        {
-            xstep = 0;
-            Mix_PlayChannel(2,run,0);
-        }
-
-        if (keys[SDLK_RIGHT])
-        {
-            xstep = 2;
-            Mix_PlayChannel(2,run,0);
-        }
-        if (keys[SDLK_SPACE])
-        {
-            ystep = 0;
-
-        }
-    }
-//9
-    if (((lev[i-1][j-1]==0)||(lev[i-1][j-1]==1)||(lev[i-1][j-1]==2))
-            &&((lev[i][j-1]==1)||(lev[i][j-1]==2))
-            &&((lev[i+1][j-1]==0)||(lev[i+1][j-1]==1)||(lev[i+1][j-1]==2))
-            &&((lev[i-1][j+1]==0)||(lev[i-1][j+1]==1)||(lev[i-1][j+1]==2))
-            &&((lev[i][j+1]==1)||(lev[i][j+1]==2))
-            &&((lev[i+1][j+1]==0)||(lev[i+1][j+1]==1)||(lev[i+1][j+1]==2))
-            &&(lev[i-1][j]==0)
-            &&((lev[i+1][j]==1)||(lev[i+1][j]==2)))
-    {
-        if (keys[SDLK_DOWN])
-        {
-            ystep = 0;
-        }
-        if (keys[SDLK_LEFT])
-        {
-            xstep = 0;
-            Mix_PlayChannel(2,run,0);
-        }
-
-        if (keys[SDLK_RIGHT])
-        {
-            xstep = 0;
-            Mix_PlayChannel(2,run,0);
-        }
-        if (keys[SDLK_SPACE])
-        {
-            ystep = -5;
-
-        }
-    }
-    //10
-    if (((lev[i-1][j-1]==0)||(lev[i-1][j-1]==1)||(lev[i-1][j-1]==2))
-            &&((lev[i-1][j]==1)||(lev[i-1][j]==2))
-            &&((lev[i-1][j+1]==0)||(lev[i-1][j+1]==1)||(lev[i-1][j+1]==2))
-            &&((lev[i+1][j-1]==0)||(lev[i+1][j-1]==1)||(lev[i+1][j-1]==2))
-            &&((lev[i+1][j]==1)||(lev[i+1][j]==2))
-            &&((lev[i+1][j+1]==0)||(lev[i+1][j+1]==1)||(lev[i+1][j+1]==2))
-            &&(lev[i][j-1]==0)
-            &&((lev[i][j+1]==1)||(lev[i][j+1]==2)))
-    {
-        if (keys[SDLK_DOWN])
-        {
-            ystep = 0;
-        }
-        if (keys[SDLK_LEFT])
-        {
-            xstep = -2;
-            Mix_PlayChannel(2,run,0);
-        }
-
-        if (keys[SDLK_RIGHT])
-        {
-            xstep = 0;
-            Mix_PlayChannel(2,run,0);
-        }
-        if (keys[SDLK_SPACE])
-        {
-            ystep = 0;
-
-        }
-    }
-//11
-    if (((lev[i-1][j-1]==0)||(lev[i-1][j-1]==1)||(lev[i-1][j-1]==2))
-            &&((lev[i][j-1]==1)||(lev[i][j-1]==2))
-            &&((lev[i+1][j-1]==0)||(lev[i+1][j-1]==1)||(lev[i+1][j-1]==2))
-            &&((lev[i-1][j+1]==0)||(lev[i-1][j+1]==1)||(lev[i-1][j+1]==2))
-            &&((lev[i][j+1]==1)||(lev[i][j+1]==2))
-            &&((lev[i+1][j+1]==0)||(lev[i+1][j+1]==1)||(lev[i+1][j+1]==2))
-            &&((lev[i-1][j]==1)||(lev[i-1][j]==2))
-            &&(lev[i+1][j]==0))
-    {
-        if (keys[SDLK_DOWN])
-        {
-            ystep = 2;
-        }
-        if (keys[SDLK_LEFT])
-        {
-            xstep = 0;
-            Mix_PlayChannel(2,run,0);
-        }
-
-        if (keys[SDLK_RIGHT])
-        {
-            xstep = 0;
-            Mix_PlayChannel(2,run,0);
-        }
-        if (keys[SDLK_SPACE])
-        {
-            ystep = 0;
-
-        }
-    }
-//12
-    if (((lev[i-1][j-1]==0)||(lev[i-1][j-1]==1)||(lev[i-1][j-1]==2))
-            &&((lev[i][j-1]==1)||(lev[i][j-1]==2))
-            &&((lev[i+1][j-1]==0)||(lev[i+1][j-1]==1)||(lev[i+1][j-1]==2))
-            &&((lev[i+1][j]==1)||(lev[i+1][j]==2))
-            &&((lev[i+1][j+1]==0)||(lev[i+1][j+1]==1)||(lev[i+1][j+1]==2))
-            &&(lev[i][j+1]==0)
-            &&((lev[i-1][j+1]==0)||(lev[i-1][j+1]==1)||(lev[i-1][j+1]==2))
-            &&(lev[i-1][j]==0))
-    {
-        if (keys[SDLK_DOWN])
-        {
-            ystep = 0;
-        }
-        if (keys[SDLK_LEFT])
-        {
-            xstep = 0;
-            Mix_PlayChannel(2,run,0);
-        }
-
-        if (keys[SDLK_RIGHT])
-        {
-            xstep = 2;
-            Mix_PlayChannel(2,run,0);
-        }
-        if (keys[SDLK_SPACE])
-        {
-            ystep = -5;
-
-        }
-    }
-//13
-    if (((lev[i-1][j-1]==0)||(lev[i-1][j-1]==1)||(lev[i-1][j-1]==2))
-            &&(lev[i][j-1]==0)
-            &&((lev[i+1][j-1]==0)||(lev[i+1][j-1]==1)||(lev[i+1][j-1]==2))
-            &&((lev[i+1][j]==1)||(lev[i+1][j]==2))
-            &&((lev[i+1][j+1]==0)||(lev[i+1][j+1]==1)||(lev[i+1][j+1]==2))
-            &&((lev[i][j+1]==1)||(lev[i][j+1]==2))
-            &&((lev[i-1][j+1]==0)||(lev[i-1][j+1]==1)||(lev[i-1][j+1]==2))
-            &&(lev[i-1][j]==0))
-    {
-        if (keys[SDLK_DOWN])
-        {
-            ystep = 0;
-        }
-        if (keys[SDLK_LEFT])
-        {
-            xstep = -2;
-            Mix_PlayChannel(2,run,0);
-        }
-
-        if (keys[SDLK_RIGHT])
-        {
-            xstep = 0;
-            Mix_PlayChannel(2,run,0);
-        }
-        if (keys[SDLK_SPACE])
-        {
-            ystep = -5;
-
-        }
-    }
-//14
-    if (((lev[i-1][j-1]==0)||(lev[i-1][j-1]==1)||(lev[i-1][j-1]==2))
-            &&((lev[i][j-1]==1)||(lev[i][j-1]==2))
-            &&((lev[i+1][j-1]==0)||(lev[i+1][j-1]==1)||(lev[i+1][j-1]==2))
-            &&(lev[i+1][j]==0)
-            &&((lev[i+1][j+1]==0)||(lev[i+1][j+1]==1)||(lev[i+1][j+1]==2))
-            &&(lev[i][j+1]==0)
-            &&((lev[i-1][j+1]==0)||(lev[i-1][j+1]==1)||(lev[i-1][j+1]==2))
-            &&((lev[i-1][j]==1)||(lev[i-1][j]==2)))
-    {
-        if (keys[SDLK_DOWN])
-        {
-            ystep = 2;
-        }
-        if (keys[SDLK_LEFT])
-        {
-            xstep = 0;
-            Mix_PlayChannel(2,run,0);
-        }
-
-        if (keys[SDLK_RIGHT])
-        {
-            xstep = 2;
-            Mix_PlayChannel(2,run,0);
-        }
-        if (keys[SDLK_SPACE])
-        {
-            ystep = 0;
-
-        }
-    }
-    //15
-    if (((lev[i-1][j-1]==0)||(lev[i-1][j-1]==1)||(lev[i-1][j-1]==2))
-            &&(lev[i][j-1]==0)
-            &&((lev[i+1][j-1]==0)||(lev[i+1][j-1]==1)||(lev[i+1][j-1]==2))
-            &&((lev[i-1][j+1]==0)||(lev[i-1][j+1]==1)||(lev[i-1][j+1]==2))
-            &&((lev[i][j+1]==1)||(lev[i][j+1]==2))
-            &&((lev[i+1][j+1]==0)||(lev[i+1][j+1]==1)||(lev[i+1][j+1]==2))
-            &&((lev[i-1][j]==1)||(lev[i-1][j]==2))
-            &&(lev[i+1][j]==0))
-    {
-        if (keys[SDLK_DOWN])
-        {
-            ystep = 2;
-        }
-        if (keys[SDLK_LEFT])
-        {
-            xstep = -2;
-            Mix_PlayChannel(2,run,0);
-        }
-
-        if (keys[SDLK_RIGHT])
-        {
-            xstep = 0;
-            Mix_PlayChannel(2,run,0);
-        }
-        if (keys[SDLK_SPACE])
-        {
-            ystep = 0;
-
-        }
-
-    }
 }
 
 
