@@ -4,14 +4,13 @@
 #include <SDL/SDL_ttf.h>
 #include <string.h>
 #include <stdlib.h>
+
 void  sound();
 void clean_up();
-void LoadMusic();
 //Screen attributes
 int SCREEN_WIDTH = 640;
 int SCREEN_HEIGHT = 480;
 int SCREEN_BPP = 32;
-
 //The surfaces
 SDL_Surface *background = NULL;
 SDL_Surface *m1 = NULL;
@@ -76,12 +75,6 @@ void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination)
 
 int init()
 {
-    //Initialize all SDL subsystems
-    if( SDL_Init( SDL_INIT_EVERYTHING ) == -1 )
-    {
-        return 0;
-    }
-
     //Set up the screen
     screen = SDL_SetVideoMode( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SDL_SWSURFACE );
 
@@ -99,7 +92,7 @@ int init()
 
     //Set the window caption
     SDL_WM_SetCaption( "MARIO MENU", NULL );
-
+    SDL_WM_SetIcon(SDL_LoadBMP("icon.bmp"), NULL);
     //If everything initialized fine
     return 1;
 }
@@ -108,65 +101,50 @@ int load_files()
 {
     //Load the background image
     background = load_image( "background.png" );
-
     //Open the font
-    font = TTF_OpenFont( "lazy.ttf", 19);
-    //TTF_SetFontStyle("lazy.ttf",0x01);
-
-    //If there was a problem in loading the background
+    font = TTF_OpenFont( "menu.ttf", 19);
+     //If there was a problem in loading the background
     if( background == NULL )
     {
         return 0;
     }
-
     //If there was an error in loading the font
     if( font == NULL )
     {
         return 0;
     }
-
-    //If everything loaded fine
     return 1;
-}
+    }
 
 int main_menu( int argc, char* args[] )
 {
-    //Quit flag
+
     int quit = 0;
     sound();
-    LoadMusic();
-   // Mix_PlayMusic ( music_menu,-1 );
-    //The timer starting time
-    Uint32 start = 0;
-
-    //The timer start/stop flag
-    int running = 0;
-
+    Mix_Music *music_menu = NULL;
+    music_menu = Mix_LoadMUS( "music_menu.mp3" );
+    Mix_PlayMusic ( music_menu,-1 );
     //Initialize
     if( init() == 0 )
     {
         return 1;
     }
-
     //Load the files
     if( load_files() == 0 )
     {
         return 1;
     }
 
-    //Generate the message surface
-    m1 = TTF_RenderText_Solid( font, "Main menu", textColor );
-    m2 = TTF_RenderText_Solid( font, "Load game", textColor );
-    m3 = TTF_RenderText_Solid( font, "Save game", textColor );
-    m4 = TTF_RenderText_Solid( font, "Exit", textColor );
+    m1 = TTF_RenderText_Solid( font, "M a i n  m e n u", textColor );
+    m2 = TTF_RenderText_Solid( font, "L o a d   g a m e", textColor );
+    m3 = TTF_RenderText_Solid( font, "S a v e   g a m e", textColor );
+    m4 = TTF_RenderText_Solid( font, "E x i t", textColor );
 
-    //Start the timer
-    start = SDL_GetTicks();
     apply_surface( 0, 0, background, screen );
-    apply_surface( 500, 200, m1, screen );
-    apply_surface( 500, 230, m2, screen );
-    apply_surface( 500, 260, m3, screen );
-    apply_surface( 520, 290, m4, screen );
+    apply_surface( 453, 241, m1, screen );
+    apply_surface( 450, 271, m2, screen );
+    apply_surface( 450, 301, m3, screen );
+    apply_surface( 500, 331, m4, screen );
 
     //While the user hasn't quit
     while( quit == 0 )
@@ -174,33 +152,11 @@ int main_menu( int argc, char* args[] )
         //While there's an event to handle
         while( SDL_PollEvent( &event ) )
         {
-            //If a key was pressed
-            if( event.type == SDL_KEYDOWN )
-            {
-                //If s was pressed
-                if( event.key.keysym.sym == SDLK_s )
-                {
-                    //If the timer is running
-                    if( running == 1 )
-                    {
-                        //Stop the timer
-                        running = 0;
-                        start = 0;
-                    }
-                    else
-                    {
-                        //Start the timer
-                        running = 1;
-                        start = SDL_GetTicks();
-                    }
-                }
-            }
-
             //If the user has Xed out the window
-            if( event.type == SDL_QUIT )
+            if( event.type == SDL_QUIT || event.key.keysym.sym == SDLK_ESCAPE )
             {
-                //Quit the program
-                quit = 1;
+            Mix_PauseMusic();
+            quit = 1;
             }
         }
 

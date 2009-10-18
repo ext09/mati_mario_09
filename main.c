@@ -45,11 +45,10 @@ int main(int argc, char *argv[])
 {
     main_menu();
     printf ("\t\nREADY\n");
- //   Uint8* keys;
     sound();
     level();
     LoadMusic();
-    Mix_VolumeMusic(90);
+    Mix_VolumeMusic(120);
     Mix_VolumeChunk(run,45);
     if ( SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO) < 0 )
     {
@@ -58,9 +57,9 @@ int main(int argc, char *argv[])
     }
     atexit(SDL_Quit);
 
-    SDL_WM_SetCaption("...","Mario");
+    SDL_WM_SetCaption("Mario","Mario");
     SDL_WM_SetIcon(SDL_LoadBMP("icon.bmp"), NULL);
-    screen=SDL_SetVideoMode(1024,768,32,SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_FULLSCREEN);
+    screen=SDL_SetVideoMode(1024,768,24,SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_NOFRAME);
     if ( screen == NULL )
     {
         printf("Unable to set 640x480 video: %s\n", SDL_GetError());
@@ -85,15 +84,11 @@ int main(int argc, char *argv[])
             if ( event.type == SDL_KEYDOWN )
             {
 
-                //   Mix_ResumeMusic();
-
                 if ( event.key.keysym.sym == SDLK_ESCAPE )
                 {
                     done = 1;
                 }
-                // keys = SDL_GetKeyState(NULL);
-               move();
-                //Mix_PauseMusic();
+                move();
                 DrawScene();
             }
         }
@@ -120,11 +115,6 @@ void LoadMusic()
 {
     music = Mix_LoadMUS( "music.mp3" );
     if ( music == NULL )
-    {
-        printf(" music not found");
-    }
-    music_menu = Mix_LoadMUS( "music_menu.mp3" );
-    if ( music_menu == NULL )
     {
         printf(" music not found");
     }
