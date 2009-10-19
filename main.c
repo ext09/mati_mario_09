@@ -5,10 +5,19 @@
 #define HEIGHT 16
 #define WIDTH 20
 
+
+/* ------------------------------------------- */
+/* ----------------animation------------------ */
+/* ------------------------------------------- */
+struct player
+{
+    int xpos,ypos,vx,vy,col;
+    SDL_Surface* link;
+    int start, stop;
+};
 /* ------------------------------------------- */
 /* ----------------function------------------- */
 /* ------------------------------------------- */
-
 void InitImages(void);
 void DrawIMG(SDL_Surface *img, int x, int y);
 void DrawIMG1(SDL_Surface *img, int x, int y, int w, int h, int sx, int sy);
@@ -24,6 +33,7 @@ int main_menu(void);
 int lev[HEIGHT][WIDTH];
 
 // image
+
 SDL_Surface *sky;
 SDL_Surface *earth;
 SDL_Surface *wood;
@@ -59,7 +69,7 @@ int main(int argc, char *argv[])
 
     SDL_WM_SetCaption("Mario","Mario");
     SDL_WM_SetIcon(SDL_LoadBMP("icon.bmp"), NULL);
-    screen=SDL_SetVideoMode(1024,768,24,SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_NOFRAME);
+    screen=SDL_SetVideoMode(1000,768,16,SDL_HWSURFACE|SDL_DOUBLEBUF);
     if ( screen == NULL )
     {
         printf("Unable to set 640x480 video: %s\n", SDL_GetError());
@@ -74,6 +84,7 @@ int main(int argc, char *argv[])
     Mix_PlayMusic( music,-1 );
     while (done == 0)
     {
+        SDL_ShowCursor(SDL_DISABLE);
         SDL_Event event;
         while ( SDL_PollEvent(&event) )
         {
@@ -203,7 +214,7 @@ void level()
 {
     int  i,j;
     FILE *fp;
-    if ((fp=fopen("lev.txt","r "))==NULL)
+    if ((fp=fopen("lev.txt","r"))==NULL)
     {
         printf("Owubka co3danu9.\n");
         exit(666);
@@ -246,9 +257,7 @@ void move()
 {
     int i,j,i1,j1;
     Uint8* keys;
-    // i=ypos/50;
     i1=ypos%50;
-    // j=xpos/50;
     j1=xpos%50;
     keys = SDL_GetKeyState(NULL);
 
@@ -265,7 +274,8 @@ void move()
         i=ypos/50;
         j=(xpos-1)/50;
         if (lev[i][j]==0
-                &&(!i1||lev[i+1][j]==0))
+                &&(!i1||lev[i+1][j]==0)
+                &&xpos!=0)
             xstep = -2;
         else
             Mix_PlayChannel(2,run,0);
@@ -276,7 +286,8 @@ void move()
         i=ypos/50;
         j=(xpos+1)/50;
         if (lev[i][j+1]==0
-                &&(!i1||lev[i+1][j+1]==0))
+                &&(!i1||lev[i+1][j+1]==0)
+                &&xpos!=940)
             xstep = 2;
         else
             Mix_PlayChannel(2,run,0);
@@ -286,7 +297,8 @@ void move()
         i=(ypos-5)/50;
         j=xpos/50;
         if (lev[i][j]==0
-                &&(!j1||lev[i][j+1]==0))
+                &&(!j1||lev[i][j+1]==0)
+                &&ypos!=0)
             ystep = -5;
     }
 
