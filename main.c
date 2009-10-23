@@ -11,7 +11,7 @@
 /* ------------------------------------------- */
 struct player
 {
-    int xpos,ypos,vx,vy,col;
+    int xpos,ypos,vx,vy,col,xpos1,ypos1;
     SDL_Surface* link;
     int start, stop;
 };
@@ -29,6 +29,9 @@ void LoadMusic(void);
 void clean_up(void);
 void move(void);
 int main_menu(void);
+//
+void move_monstrik(void);
+//
 
 int lev[HEIGHT][WIDTH];
 
@@ -39,13 +42,16 @@ SDL_Surface *earth;
 SDL_Surface *wood;
 SDL_Surface *screen;
 SDL_Surface *image1;
+//
+SDL_Surface *monstrik;
+//
 // sound
 Mix_Music *music = NULL;//The sound effects that will be used
 Mix_Music *music_menu = NULL;
 Mix_Chunk *run = NULL;
 
 /* ------------------------------------------- */
-int xpos=0, ypos=370, xstep=0, ystep=0;
+int xpos=0, ypos=650, xstep=0, ystep=0, ypos1=650, xpos1=700, xstep1=0, ystep1=0;
 
 /* ------------------------------------------- */
 /* ----------------MAIN----------------------- */
@@ -79,9 +85,10 @@ int main(int argc, char *argv[])
     InitImages();
     DrawBG();
     SDL_SetColorKey (image1, SDL_SRCCOLORKEY, SDL_MapRGB(image1->format,255,255,255));
-    DrawScene();
+
     int done=0;
     Mix_PlayMusic( music,-1 );
+
     while (done == 0)
     {
         SDL_ShowCursor(SDL_DISABLE);
@@ -92,6 +99,7 @@ int main(int argc, char *argv[])
             {
                 done = 1;
             }
+
             if ( event.type == SDL_KEYDOWN )
             {
 
@@ -100,9 +108,14 @@ int main(int argc, char *argv[])
                     done = 1;
                 }
                 move();
-                DrawScene();
+
+
             }
+
         }
+       move_monstrik();
+
+            DrawScene();
     }
     clean_up();
     printf ("FINISH");
@@ -145,6 +158,8 @@ void InitImages()
     sky=SDL_LoadBMP("sky.bmp");
     wood=SDL_LoadBMP("wood.bmp");
     earth=SDL_LoadBMP("earth.bmp");
+    monstrik=SDL_LoadBMP("monstrik.bmp");
+
 }
 void DrawIMG(SDL_Surface *img, int x, int y)
 {
@@ -203,9 +218,15 @@ void DrawScene()
     DrawIMG1(sky, xpos, ypos, 50, 50, xpos, ypos);
     xpos += xstep;
     ypos += ystep;
+    xpos1 += xstep1;
+    ypos1 += ystep1;
     DrawIMG(image1, xpos, ypos);
+    DrawIMG(monstrik, xpos1, ypos1);
     xstep = ystep = 0;
+
+
     SDL_Flip(screen);
+
 }
 /* ------------------------------------------- */
 /* -----------------level--------------------- */
@@ -302,4 +323,23 @@ void move()
             ystep = -5;
     }
 
+}
+void move_monstrik()
+{
+    int i;
+
+    if(xpos1==700)
+    {
+        for (i=0;i<200;i++)
+        {
+            xstep1=1;
+        }
+    }
+    if(xpos1==900)
+    {
+        for (i=0;i<200;i++)
+        {
+            xstep1=-1;
+        }
+    }
 }
